@@ -1,0 +1,85 @@
+<html>
+
+<head>
+    <title>Sample Question Paper</title>
+    <style>
+    table,
+    th,
+    td {
+        border: 1px solid grey;
+        border-collapse: collapse;
+        padding: 5px;
+    }
+    
+    table tr:nth-child(odd) {
+        background-color: #f2f2f2;
+    }
+    
+    table tr:nth-child(even) {
+        background-color: #ffffff;
+    }
+    </style>
+</head>
+
+<body>
+    <div ng-app="" ng-controller="mainController">
+        <input type="text" ng-model="search">search any bookmark
+        <br>
+        <button ng-click="search_bookmark()">search</button>
+        <div ng-repeat="student in words">
+            [{{$index + 1}}] {{ student.word }}
+            <br> {{ student.description }}
+            <br>
+            <a ng-href="{{ student.audio_url }}">Link</a>
+            <br>
+            <button ng-click="bookmark(student)">Bookmark</button>
+            <br>
+            <br>
+        </div>
+        <div ng-repeat="student in bookmarks">
+            [{{$index + 1}}] {{ student.word }}
+            <br> {{ student.description }}
+            <br>
+            <a ng-href="{{ student.audio_url }}">Link</a>
+            <br>
+            <br>
+            <br>
+        </div>
+        <a href="/download">Download</a>
+    </div>
+</body>
+<script>
+function mainController($scope, $http) {
+    $scope.words = [];
+    $scope.bookmarks = [];
+    $search = "";
+    angular.element(document).ready(function() {
+        /*user_id is sent in the body part actually */
+        $http.get("/words", {}).success(function(response) {
+            $scope.words = response;
+        });
+        $http.get("/bookmarks", {}).success(function(response) {
+            $scope.bookmarks = response;
+        });
+    });
+    $scope.bookmark = function(word) {
+
+        console.log(word);
+        $http.post("/bookmark", {
+            "word": word
+        }).success(function(response) {
+            console.log(response);
+            $scope.bookmarks.push(word);
+        });
+    }
+    $scope.search_bookmark = function(word) {
+        $http.post("/search", {
+            "expression": $scope.search
+        }).success(function(response) {
+            console.log(response);
+            $scope.bookmarks = response;
+        });
+    }
+}
+</script>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.15/angular.min.js"></script>
